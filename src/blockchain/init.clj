@@ -6,8 +6,7 @@
 
 (def genesis-block {:index 1
                     :time (now)
-                    :proof "vutr.io"
-                    :previous-hash "khoai"})
+                    :proof "vutr.io"})
 
 (def chain (atom [genesis-block]))
 (def current-transactions (atom []))
