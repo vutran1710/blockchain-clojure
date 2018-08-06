@@ -2,3 +2,9 @@
 
 # GET chain
 GET :url
+
+# GET node list
+GET :url/nodes
+
+# Mine new block
+GET :url/mine
