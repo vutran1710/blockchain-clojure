@@ -7,7 +7,9 @@
             [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
             [ring.util.response :as resp]
             [blockchain.init :refer [chain nodes]]
-            [blockchain.worker :refer [forge-new-block append-to-chain]]))
+            [blockchain.worker :as worker]
+            [blockchain.agent :as agent]
+            [blockchain.helper :refer [cli-inquire]]))
 
 (defn generate-response [response]
   (if (integer? (:status response))
@@ -20,8 +22,8 @@
   (GET "/" [] (resp/response @chain))
   (GET "/nodes" [] (resp/response @nodes))
   (GET "/mine" []
-       (let [new-block (forge-new-block)]
-         (append-to-chain new-block)
+       (let [new-block (worker/forge-new-block)]
+         (worker/append-to-chain new-block)
          (generate-response {:body new-block :status 201})))
   (route/not-found "Not Found"))
 
@@ -29,3 +31,10 @@
   (-> (handler/api app-routes)
       (wrap-json-body)
       (wrap-json-response)))
+
+(defn init []
+  (try
+    (-> (cli-inquire "Connect to node -> ")
+        (agent/fetch-remote-chain))
+    (catch Exception e
+      (println "Start boot.."))))
