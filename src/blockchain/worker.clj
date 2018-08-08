@@ -29,3 +29,11 @@
         last-hashed (hashing-block (last @chain))]
     (when (validate-proof proof last-hashed)
       (do (swap! chain conj block) chain))))
+
+(defn resolve-chain-conflict [remote-chain]
+  "Chain with greater length will replace the existing chain."
+  (let [existing-length (count @chain)
+        remote-length (count remote-chain)]
+    (when (> remote-length existing-length)
+      (do (reset! chain remote-chain)
+          (println "Applied new chain...")))))
