@@ -19,7 +19,8 @@
     (resp/response response)))
 
 (defroutes app-routes
-  (GET "/" [] (resp/response @chain))
+  (GET "/" request (do (agent/get-address request)
+                       (resp/response @chain)))
   (GET "/nodes" [] (resp/response @nodes))
   (GET "/mine" []
        (let [new-block (worker/forge-new-block)]

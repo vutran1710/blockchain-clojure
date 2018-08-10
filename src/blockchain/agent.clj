@@ -14,3 +14,6 @@
         (vec)
         (resolve-chain-conflict))
     (swap! nodes conj address)))
+
+(defn get-address [{:keys [remote-addr]}]
+  (println remote-addr))
