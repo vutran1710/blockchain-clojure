@@ -4,7 +4,7 @@ services:
     build: .
     image: boot:latest
     expose:
-      - "3000"
+      - "80"
     networks:
       blockchain:
         ipv4_address: 172.16.238.10
@@ -15,10 +15,8 @@ services:
     image: boot:latest
     depends_on:
       - boot
-    links:
-      - boot
     expose:
-      - "3000"
+      - "80"
     command: ["/usr/src/app/delay.sh", "java", "-jar", "app-standalone.jar"]
     environment:
       BOOT_NODE: 172.16.238.10

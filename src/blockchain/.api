@@ -1,4 +1,4 @@
-:url = http://localhost:3000
+:url = http://172.16.238.10:3000
 
 # GET chain
 GET :url

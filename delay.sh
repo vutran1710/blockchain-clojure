@@ -3,13 +3,11 @@
 
 set -e
 
-host="$1"
-shift
 cmd="$@"
 
-until curl 172.16.238.10; do
+until curl $BOOT_NODE; do
     >&2 echo "Boot is unavailable - sleeping"
-    sleep 10
+    sleep 20
 done
 
 >&2 echo "Boot is up - executing command"
