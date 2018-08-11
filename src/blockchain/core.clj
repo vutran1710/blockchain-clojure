@@ -19,7 +19,8 @@
     (resp/response response)))
 
 (defroutes app-routes
-  (GET "/" request (do (agent/get-address request)
+  (GET "/" request (do (println "...request chain")
+                       (agent/get-address request)
                        (resp/response @chain)))
   (POST "/" {chain :body}
         (-> (keywordize-keys chain)
@@ -41,7 +42,7 @@
 (defn init []
   (try
     ;; Need a boot node preinstalled
-    (-> (cli-inquire "Connect to address -> ")
+    (-> (System/getenv "BOOT_NODE")
         (agent/fetch-remote-chain))
     (catch Exception e
       (println "Start boot.."))))

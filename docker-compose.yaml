@@ -1,0 +1,37 @@
+version: '2.1'
+services:
+  boot:
+    build: .
+    image: boot:latest
+    expose:
+      - "3000"
+    networks:
+      blockchain:
+        ipv4_address: 172.16.238.10
+    labels:
+        vutr.io: "Blockchain Network Boot Node"
+
+  node:
+    image: boot:latest
+    depends_on:
+      - boot
+    links:
+      - boot
+    expose:
+      - "3000"
+    command: ["/usr/src/app/delay.sh", "java", "-jar", "app-standalone.jar"]
+    environment:
+      BOOT_NODE: 172.16.238.10
+    networks:
+      - blockchain
+    labels:
+        vutr.io: "Blockchain Network Simulation Service"
+
+networks:
+  blockchain:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24
+        gateway: 172.16.238.1
