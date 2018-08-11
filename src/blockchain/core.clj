@@ -21,10 +21,15 @@
 (defroutes app-routes
   (GET "/" request (do (agent/get-address request)
                        (resp/response @chain)))
+  (POST "/" {chain :body}
+        (-> (keywordize-keys chain)
+            (worker/resolve-chain-conflict))
+        (generate-response {:status 200}))
   (GET "/nodes" [] (resp/response @nodes))
   (GET "/mine" []
        (let [new-block (worker/forge-new-block)]
-         (worker/append-to-chain new-block)
+         (-> (worker/append-to-chain new-block)
+             (agent/broadcast))
          (generate-response {:body new-block :status 201})))
   (route/not-found "Not Found"))
 
@@ -35,7 +40,8 @@
 
 (defn init []
   (try
-    (-> (cli-inquire "Connect to node -> ")
+    ;; Need a boot node preinstalled
+    (-> (cli-inquire "Connect to address -> ")
         (agent/fetch-remote-chain))
     (catch Exception e
       (println "Start boot.."))))

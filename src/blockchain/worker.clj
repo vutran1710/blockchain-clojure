@@ -17,6 +17,10 @@
       (if-not (validate-proof proof hashed)
         (recur (inc proof)) proof))))
 
+(defn remove-from-nodes [node]
+  (->> (remove #(= node %) @nodes)
+       (reset! nodes)))
+
 (defn forge-new-block []
   (let [last-block (last @chain)]
     {:index (inc (count @chain))

@@ -8,3 +8,15 @@ GET :url/nodes
 
 # Mine new block
 GET :url/mine
+
+# New node
+:url2 = http://localhost:3001
+
+# GET chain
+GET :url2
+
+# GET node list
+GET :url2/nodes
+
+# Mine new block
+GET :url2/mine
