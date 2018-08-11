@@ -21,7 +21,7 @@
 (defroutes app-routes
   (GET "/" request (do (println "...request chain")
                        (agent/get-address request)
-                       (resp/response @chain)))
+                       (resp/response {:chain @chain :nodes @nodes})))
   (POST "/" {chain :body}
         (-> (keywordize-keys chain)
             (worker/resolve-chain-conflict))

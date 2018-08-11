@@ -17,6 +17,10 @@
       (if-not (validate-proof proof hashed)
         (recur (inc proof)) proof))))
 
+(defn add-node [address]
+  (when-not (.contains @nodes address)
+    (swap! nodes conj address)))
+
 (defn remove-from-nodes [node]
   (->> (remove #(= node %) @nodes)
        (reset! nodes)))
@@ -41,3 +45,6 @@
     (when (> remote-length existing-length)
       (do (reset! chain remote-chain)
           (println "Applied new chain...")))))
+
+(defn update-node-list [remote-nodes]
+  (run! add-node remote-nodes))

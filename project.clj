@@ -11,8 +11,7 @@
   :plugins [[lein-ring "0.9.7"]]
   :ring {:init blockchain.core/init
          :handler blockchain.core/app
-         :open-browser? false
-         :port 80}
+         :open-browser? false}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring/ring-mock "0.3.0"]]}})

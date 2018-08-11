@@ -3,8 +3,12 @@ services:
   boot:
     build: .
     image: boot:latest
+    environment:
+      PORT: 80
     expose:
       - "80"
+    ports:
+      - "3000:80"
     networks:
       blockchain:
         ipv4_address: 172.16.238.10
@@ -17,9 +21,12 @@ services:
       - boot
     expose:
       - "80"
+    ports:
+      - "3001-3010:80"
     command: ["/usr/src/app/delay.sh", "java", "-jar", "app-standalone.jar"]
     environment:
       BOOT_NODE: 172.16.238.10
+      PORT: 80
     networks:
       - blockchain
     labels:
