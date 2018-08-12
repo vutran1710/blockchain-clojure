@@ -3,6 +3,10 @@
             [digest :refer [sha-256]]
             [clojure.java.io :refer [as-url]]))
 
+(defn- add-tail [vect item]
+  "Conj is consistent about where to add new element. Make our own function to do that."
+  (vec (concat vect [item])))
+
 (defn- hashing-block [block]
   (sha-256 (str block)))
 
@@ -38,7 +42,7 @@
   (let [proof (:proof block)
         last-hashed (hashing-block (last @chain))]
     (when (validate-proof proof last-hashed)
-      (do (swap! chain conj block) chain))))
+      (do (swap! chain add-tail block) chain))))
 
 (defn resolve-chain-conflict [remote-chain]
   "Chain with greater length will replace the existing chain."
