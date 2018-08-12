@@ -1,0 +1,152 @@
+#+OPTIONS: ^:nil
+#+TITLE: TOY BLOCKCHAIN NETWORK WITH CLOJURE + DOCKER
+#+DATE: <2018-07-31 Tue>
+#+AUTHOR: Vu Tran
+#+EMAIL: me@vutr.io
+
+#+ATTR_HTML: :style margin-left: auto; margin-right: auto; :width 500
+[[./img/logo.jpg]]
+
+* Content                                                               :TOC:
+- [[#introduction][Introduction]]
+- [[#get-up-and-running][Get up and running]]
+- [[#note][Note]]
+- [[#future-improvments][Future Improvments]]
+- [[#contributions-and-issues][Contributions and issues]]
+- [[#license][License]]
+
+* Introduction
+This is a toy Blockchain made with Clojure and Docker for network simulation.
+Our toy Blockchain is a typical simple Proof-of-Work blockchain.
+By running this app, we will have a pretty-decentralized network of multiple blockchain-nodes that can communicate with each others.
+To mine a block on any specific node, we can use a http client to send predefined request to such node.
+New block will be broadcasted to other nodes in the network so they will validate the new block and update their current
+blockchain.
+This is to support this story I wrote in *Medium*
+
+https://medium.com/@vutr/build-blockchain-with-docker-network-part-1-d041b7275b77
+
+* Get up and running
+To run the app, first you need to have Docker installed and running.
+Then clone this repo and cd into its folder:
+#+begin_src sh
+$ git clone https://github.com/vutran1710/pow-blockchain-http
+$ cd pow-blockchain-http
+#+end_src
+
+Now, we are ready to build the image and fire up Docker.
+But before that, let's examine the blockchain network setting that is set up in the file /docker-compose.yaml/.
+Have a look at the *node* ports setting:
+#+begin_src yaml
+  node:
+  ...
+    ports:
+      - "3001-3003:80"
+#+end_src
+Such port setting indicates that we can have up to *3 child nodes* and *1 boot node* in the network.
+To scale for more node running at the same time, you can change it to a broader range, eg: *3001:3010*
+
+If you are already happy for such setting, let's get our network up!
+#+begin_src sh
+$ docker-compose up --scale node=3
+#+end_src
+
+Now go a have a cup of coffee while Docker is building the image and fetching neccessary libaries for Clojure.
+After 2 sips, you will probably see something like this
+
+#+caption: Network running
+[[./img/nw.png]]
+
+Great! Now let's examine the our blockchain network.
+Open a new tab of the current terminal, type in the following code.
+You would see a list of online network by Docker
+#+begin_src sh
+$ docker network ls
+
+NETWORK ID          NAME                        DRIVER              SCOPE
+f67383a86a96        bridge                      bridge              local
+7e3161956e4e        host                        host                local
+e32dda69c01e        none                        null                local
+34888cf7754f        pos-blockchain_blockchain   bridge              local
+#+end_src
+
+There it is, our blockchain! Let's inspect it!
+There will a very long text, but we care about the *containers* part only
+#+begin_src sh
+$ docker inspect 34888cf7754f
+
+"Containers": {
+        "1f511d473a11112cac427b0fd672b31be76b22825d035dba07d6a019c9133636": {
+        "Name": "pos-blockchain_node_2",
+        "EndpointID": "af94efbeb0c93737bc5574307f9ed8df34303ec22b55c01f468852a87b36e79e",
+        "MacAddress": "02:42:ac:10:ee:02",
+        "IPv4Address": "172.16.238.2/24",
+        "IPv6Address": ""
+    },
+    "20c1c8dacc525807933f1211c454b45292b06e175a30cc14e5bf749592710ed2": {
+        "Name": "pos-blockchain_node_1",
+        "EndpointID": "a6dc7a0f39415537776e256c21175437f96c19eaecbf59e7079c749dbf5db565",
+        "MacAddress": "02:42:ac:10:ee:03",
+        "IPv4Address": "172.16.238.3/24",
+        "IPv6Address": ""
+    },
+    "581da2de7dce9771ac0ed215229b72cb3aa2379f5e8b87820225a5734d184f9c": {
+        "Name": "pos-blockchain_boot_1",
+        "EndpointID": "46586524a421c83a2fede99eaf2f5bd4647785ccf298395b5e2cba5ebe99de1a",
+        "MacAddress": "02:42:ac:10:ee:0a",
+        "IPv4Address": "172.16.238.10/24",
+        "IPv6Address": ""
+    },
+    "708882e36638c4482e31003c4a911dfd93f5a5baaa3e3a2fe265147ab739cd5a": {
+        "Name": "pos-blockchain_node_3",
+        "EndpointID": "6dbc699c9873385bf090ed7209c5943d04f3b3152ad4c1d7d5bc1c2a1158316c",
+        "MacAddress": "02:42:ac:10:ee:04",
+        "IPv4Address": "172.16.238.4/24",
+        "IPv6Address": ""
+    }
+},
+#+end_src
+
+There are 4 nodes, each with its own IPv4Address. This is how containers would talk with each others within our docker
+network.
+Now, how about mine some block for starting?
+Let's inspect the ports of these containers! Type in:
+#+begin_src sh
+$ docker ps
+
+CONTAINER ID     IMAGE          COMMAND                  CREATED          STATUS           PORTS                    NAMES
+708882e36638     boot:latest    "/usr/src/app/delay.…"   2 hours ago      Up 13 minutes    0.0.0.0:3003->80/tcp     pos-blockchain_node_3
+20c1c8dacc52     boot:latest    "/usr/src/app/delay.…"   2 hours ago      Up 13 minutes    0.0.0.0:3002->80/tcp     pos-blockchain_node_1
+1f511d473a11     boot:latest    "/usr/src/app/delay.…"   2 hours ago      Up 13 minutes    0.0.0.0:3001->80/tcp     pos-blockchain_node_2
+581da2de7dce     boot:latest    "java -jar app-stand…"   2 hours ago      Up 13 minutes    0.0.0.0:3000->80/tcp     pos-blockchain_boot_1
+#+end_src
+
+Cool! We now can use some http-client to send request to these container through *localhost* with ports from *3000 ->
+3003*.
+Below are the api endpoint available of a single node (port varies for each node):
+
+1. *GET http://localhost:3000/* :: This will return the current *blockchain* and *node-list*
+2. *POST http://localhost:3000/* :: This is to submit a new blockchain to the node
+3. *GET http://localhost:3000/mine* :: Mine a block. After having mined a block, the node will automatically broadcast its new blockchain to all nodes in
+   the network that it is aware of.
+4. *GET http://localhost:3000/update* :: Manully ask a node to look around and ask its peers for update of the blockchain and node-list
+
+That's all there is to it! Happy hacking!
+
+* Note
+You can always have more nodes in the network by 2 ways:
+1. Modify port-range for node in /docker-compose.yaml/ and specify the scale argument in command ~docker-compose up
+   --scale node=n~, where n is the number of nodes you want.
+2. Fire up another container and attach it the existing blockchain network.
+
+* Future Improvments
++ Dashboard :: I want a dashboard so we can easily fire up nodes as well as mining from a friendly user interface. Maybe a small
+  Express server with React will do the job.
++ Transactions :: If a blockchain cannot hold any transaction, it's useless.
++ Wallet-logic :: A wallet would be cool to huh?
+
+* Contributions and issues
+...are welcome!
+
+* License
+MIT 2018 by Vu Tran
