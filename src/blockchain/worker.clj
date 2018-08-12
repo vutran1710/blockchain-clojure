@@ -19,7 +19,8 @@
 
 (defn add-node [address]
   (when-not (or (.contains @nodes address)
-                (= address "0:0:0:0:0:0:0:1"))
+                (= address "0:0:0:0:0:0:0:1")
+                (= address (System/getenv "GATEWAY")))
     (swap! nodes conj address)))
 
 (defn remove-from-nodes [node]

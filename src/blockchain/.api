@@ -1,3 +1,4 @@
+# Boot node
 :url = http://localhost:3000
 
 # GET chain
@@ -6,8 +7,24 @@ GET :url
 # Mine new block
 GET :url/mine
 
-# New node
-:url2 = http://localhost:3001
+
+
+# Node 1
+:url1 = http://localhost:3001
+
+# GET chain
+GET :url1
+
+# Mine new block
+GET :url1/mine
+
+# Mine new block
+GET :url1/update
+
+
+
+# Node 2
+:url2 = http://localhost:3002
 
 # GET chain
 GET :url2
@@ -17,19 +34,3 @@ GET :url2/mine
 
 # Mine new block
 GET :url2/update
-
-
-# New node
-:url3 = http://localhost:3010
-
-# GET chain
-GET :url3
-
-# GET node list
-GET :url3/nodes
-
-# Mine new block
-GET :url3/mine
-
-# Mine new block
-GET :url3/update

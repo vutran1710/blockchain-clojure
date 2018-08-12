@@ -5,6 +5,7 @@ services:
     image: boot:latest
     environment:
       PORT: 80
+      GATEWAY: 172.16.238.1
     expose:
       - "80"
     ports:
@@ -12,8 +13,6 @@ services:
     networks:
       blockchain:
         ipv4_address: 172.16.238.10
-    labels:
-        vutr.io: "Blockchain Network Boot Node"
 
   node:
     image: boot:latest
@@ -22,15 +21,14 @@ services:
     expose:
       - "80"
     ports:
-      - "3001-3010:80"
+      - "3001-3003:80"
     command: ["/usr/src/app/delay.sh", "java", "-jar", "app-standalone.jar"]
     environment:
       BOOT_NODE: 172.16.238.10
       PORT: 80
+      GATEWAY: 172.16.238.1
     networks:
       - blockchain
-    labels:
-        vutr.io: "Blockchain Network Simulation Service"
 
 networks:
   blockchain:
