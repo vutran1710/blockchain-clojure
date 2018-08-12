@@ -1,9 +1,8 @@
-(ns blockchain.helper)
+(ns blockchain.helper
+  (:require [clojure.string :refer [starts-with?]]))
 
-(defn add-tail [vect item]
-  "Conj is consistent about where to add new element."
-  "Make our own function to do that."
-  (vec (concat vect [item])))
+(defn now []
+  (quot (System/currentTimeMillis) 1000))
 
 (defn fix-prc [addr]
   "Fix address without http protocol"

@@ -1,11 +1,8 @@
 (ns blockchain.worker
   (:require [blockchain.init :refer :all]
             [digest :refer [sha-256]]
-            [clojure.java.io :refer [as-url]]))
+            [blockchain.helper :refer [now]]))
 
-(defn- add-tail [vect item]
-  "Conj is consistent about where to add new element. Make our own function to do that."
-  (vec (concat vect [item])))
 
 (defn- hashing-block [block]
   (sha-256 (str block)))
@@ -36,16 +33,6 @@
         (recur (inc id) (inc idx)) false)
       true)))
 
-(defn add-node [address]
-  (when-not (or (.contains @nodes address)
-                (= address "0:0:0:0:0:0:0:1")
-                (= address (System/getenv "GATEWAY")))
-    (swap! nodes conj address)))
-
-(defn remove-from-nodes [node]
-  (->> (remove #(= node %) @nodes)
-       (reset! nodes)))
-
 (defn forge-new-block []
   (let [last-block (last @chain)]
     {:index (inc (count @chain))
@@ -57,7 +44,7 @@
   (let [proof (:proof block)
         last-hashed (hashing-block (last @chain))]
     (when (validate-proof proof last-hashed)
-      (do (swap! chain add-tail block) chain))))
+      (do (swap! chain conj block) chain))))
 
 (defn resolve-chain-conflict [remote-chain]
   "Chain with greater length will replace the existing chain."
@@ -67,6 +54,3 @@
       (when (validate-chain remote-chain)
         (do (reset! chain remote-chain)
             (println "Applied new chain..."))))))
-
-(defn update-node-list [remote-nodes]
-  (run! add-node remote-nodes))

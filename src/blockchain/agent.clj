@@ -1,19 +1,23 @@
 (ns blockchain.agent
   (:require [clj-http.client :as client]
-            [clojure.string :refer [starts-with?]]
             [blockchain.init :refer :all]
-            [blockchain.worker :refer
-             [resolve-chain-conflict
-              remove-from-nodes
-              update-node-list
-              add-node]]))
+            [blockchain.helper :refer [fix-prc]]
+            [blockchain.worker :refer [resolve-chain-conflict]]))
 
 
-(defn- fix-prc [addr]
-  (if (starts-with? addr "http")
-    addr
-    (str "http://" addr)))
+;; Behind-the-scene works
+(defn- add-node [address]
+  (when-not (or (.contains @nodes address)
+                (= address "0:0:0:0:0:0:0:1")
+                (= address (System/getenv "GATEWAY")))
+    (swap! nodes conj address)))
 
+(defn- remove-from-nodes [node]
+  (->> (remove #(= node %) @nodes)
+       (reset! nodes)))
+
+(defn- update-node-list [remote-nodes]
+  (run! add-node remote-nodes))
 
 (defn- submit-chain [addr]
   (when (string? addr)
@@ -27,13 +31,15 @@
                                (remove-from-nodes addr))))
       (catch Exception e (remove-from-nodes addr)))))
 
-(defn broadcast []
-  "Submit the new chain to other nodes in the network."
-  (run! submit-chain @nodes))
-
 (defn- update-node-chain [{:keys [chain nodes]}]
   (resolve-chain-conflict chain)
   (update-node-list nodes))
+
+
+;; Public services
+(defn broadcast []
+  "Submit the new chain to other nodes in the network."
+  (run! submit-chain @nodes))
 
 (defn fetch-remote-chain [address]
   (println "Fetching from >>" address)

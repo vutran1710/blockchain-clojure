@@ -1,13 +1,10 @@
 (ns blockchain.init
-  (:require [digest :refer [sha-256]]
-            [clojure.java.io :refer [as-url]]))
+  (:require [blockchain.helper :refer [now]]))
 
-(defn now [] (quot (System/currentTimeMillis) 1000))
 
-(def genesis-block {:index 1
-                    :time (now)
-                    :proof "vutr.io"})
+(defonce ^:private genesis-block {:index 1
+                                  :time (now)
+                                  :proof "vutr.io"})
 
 (def chain (atom [genesis-block]))
-(def current-transactions (atom []))
 (def nodes (atom []))

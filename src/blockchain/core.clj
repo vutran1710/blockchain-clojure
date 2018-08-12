@@ -3,10 +3,9 @@
             [compojure.route :as route]
             [compojure.handler :as handler]
             [clojure.walk :refer [keywordize-keys]]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
             [ring.util.response :as resp]
-            [blockchain.init :refer [chain nodes]]
+            [blockchain.init :refer :all]
             [blockchain.worker :as worker]
             [blockchain.agent :as agent]))
 
@@ -23,6 +22,7 @@
   (POST "/" {chain :body}
         (do (println "Someone is submitting a chain...")
             (-> (keywordize-keys chain)
+                (vec)
                 (worker/resolve-chain-conflict)))
         (generate-response {:status 200}))
   (GET "/update" [] (do (run! agent/fetch-remote-chain @nodes)
