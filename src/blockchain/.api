@@ -3,9 +3,6 @@
 # GET chain
 GET :url
 
-# GET node list
-GET :url/nodes
-
 # Mine new block
 GET :url/mine
 
@@ -15,15 +12,15 @@ GET :url/mine
 # GET chain
 GET :url2
 
-# GET node list
-GET :url2/nodes
-
 # Mine new block
 GET :url2/mine
 
+# Mine new block
+GET :url2/update
+
 
 # New node
-:url3 = http://localhost:3002
+:url3 = http://localhost:3010
 
 # GET chain
 GET :url3
@@ -33,3 +30,6 @@ GET :url3/nodes
 
 # Mine new block
 GET :url3/mine
+
+# Mine new block
+GET :url3/update

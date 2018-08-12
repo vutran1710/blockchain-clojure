@@ -19,18 +19,19 @@
     (resp/response response)))
 
 (defroutes app-routes
-  (GET "/" request (do (println "...request chain")
-                       (agent/get-address request)
+  (GET "/" request (do (agent/get-address request)
                        (resp/response {:chain @chain :nodes @nodes})))
   (POST "/" {chain :body}
-        (-> (keywordize-keys chain)
-            (worker/resolve-chain-conflict))
+        (do (println "Someone is submitting a chain...")
+            (-> (keywordize-keys chain)
+                (worker/resolve-chain-conflict)))
         (generate-response {:status 200}))
-  (GET "/nodes" [] (resp/response @nodes))
+  (GET "/update" [] (do (run! agent/fetch-remote-chain @nodes)
+                        (resp/response {:chain @chain :nodes @nodes})))
   (GET "/mine" []
        (let [new-block (worker/forge-new-block)]
-         (-> (worker/append-to-chain new-block)
-             (agent/broadcast))
+         (worker/append-to-chain new-block)
+         (agent/broadcast)
          (generate-response {:body new-block :status 201})))
   (route/not-found "Not Found"))
 
@@ -41,7 +42,6 @@
 
 (defn init []
   (try
-    ;; Need a boot node preinstalled
     (-> (System/getenv "BOOT_NODE")
         (agent/fetch-remote-chain))
     (catch Exception e

@@ -18,7 +18,8 @@
         (recur (inc proof)) proof))))
 
 (defn add-node [address]
-  (when-not (.contains @nodes address)
+  (when-not (or (.contains @nodes address)
+                (= address "0:0:0:0:0:0:0:1"))
     (swap! nodes conj address)))
 
 (defn remove-from-nodes [node]
