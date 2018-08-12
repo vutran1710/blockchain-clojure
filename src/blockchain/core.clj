@@ -8,8 +8,7 @@
             [ring.util.response :as resp]
             [blockchain.init :refer [chain nodes]]
             [blockchain.worker :as worker]
-            [blockchain.agent :as agent]
-            [blockchain.helper :refer [cli-inquire]]))
+            [blockchain.agent :as agent]))
 
 (defn generate-response [response]
   (if (integer? (:status response))
