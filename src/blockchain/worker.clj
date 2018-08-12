@@ -21,6 +21,21 @@
       (if-not (validate-proof proof hashed)
         (recur (inc proof)) proof))))
 
+(defn- validate-adjacent-blocks [block prv-block]
+  (and (=
+        (:index block)
+        (inc (:index prv-block)))
+       (validate-proof
+        (:proof block)
+        (hashing-block prv-block))))
+
+(defn- validate-chain [new-chain]
+  (loop [id 0 idx 1]
+    (if (< idx (count new-chain))
+      (if (validate-adjacent-blocks (new-chain idx) (new-chain id))
+        (recur (inc id) (inc idx)) false)
+      true)))
+
 (defn add-node [address]
   (when-not (or (.contains @nodes address)
                 (= address "0:0:0:0:0:0:0:1")
@@ -49,8 +64,9 @@
   (let [existing-length (count @chain)
         remote-length (count remote-chain)]
     (when (> remote-length existing-length)
-      (do (reset! chain remote-chain)
-          (println "Applied new chain...")))))
+      (when (validate-chain remote-chain)
+        (do (reset! chain remote-chain)
+            (println "Applied new chain..."))))))
 
 (defn update-node-list [remote-nodes]
   (run! add-node remote-nodes))
