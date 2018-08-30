@@ -22,7 +22,8 @@ By running this app, we will have a pretty-decentralized network of multiple blo
 To mine a block on any specific node, we can use a http client to send predefined request to such node.
 New block will be broadcasted to other nodes in the network so they will validate the new block and update their current
 blockchain.
-This is to support this story I wrote in *Medium*
+
+This is to support the story I wrote in *Medium*:
 
 https://medium.com/@vutr/build-blockchain-with-docker-network-part-1-d041b7275b77
 
