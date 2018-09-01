@@ -26,6 +26,7 @@ blockchain.
 This is to support the story I wrote in *Medium*:
 
 https://medium.com/@vutr/build-blockchain-with-docker-network-part-1-d041b7275b77
+
 https://medium.com/@vutr/build-blockchain-with-docker-network-part-2-b04206289724
 
 * Get up and running
